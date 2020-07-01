@@ -20,7 +20,7 @@ func GetModuleTrees(rules []IRule) []*Module {
 	// level 1
 	for _, p := range parents {
 		for _, r := range rules {
-			if r.GetParentID() == p.GetID() && p.GetLevel() == r.GetLevel() {
+			if r.GetParentID() == p.GetID() {
 				//m.ID = r.GetID()
 				//m.Name = append(m.Name, r.GetName())
 				modules = append(modules, &Module{
