@@ -21,7 +21,7 @@ func SetSUB(v string) {
 
 type RBAC struct {
 	roles      []*Role
-	users      map[string]string
+	users      map[string][]string
 	ruleCached []string
 	l          sync.Mutex
 }
@@ -33,7 +33,7 @@ type Role struct {
 
 func New() *RBAC {
 	return &RBAC{
-		users:      make(map[string]string),
+		users:      make(map[string][]string),
 		ruleCached: make([]string, 0),
 	}
 }
@@ -103,45 +103,49 @@ func (rbac *RBAC) SetRoles(g ...*Role) {
 	}
 }
 
-func (rbac *RBAC) Users(username string, roleName string) {
+func (rbac *RBAC) God(username string) {
+
+}
+
+func (rbac *RBAC) Users(username string, roles ...string) {
 	rbac.l.Lock()
 	defer rbac.l.Unlock()
 
-	rbac.users[username] = roleName
+	rbac.users[username] = roles
 }
 
-func (rbac *RBAC) UserRole(username string) (bool, string) {
-	var roleName string
+func (rbac *RBAC) UserRole(username string) (bool, []string) {
+	var roles []string
 	var isFoundRole bool
 
-	if roleName, isFoundRole = rbac.users[username]; !isFoundRole {
-		return false, ""
+	if roles, isFoundRole = rbac.users[username]; !isFoundRole {
+		return false, roles
 	}
 
-	return true, roleName
+	return true, roles
 }
 
 func (rbac *RBAC) RoleUsers() map[string][]string {
 	var roles = make(map[string][]string)
 
-	for username, r := range rbac.users {
-		if _, ok := roles[r]; !ok {
-			roles[r] = make([]string, 0)
-		}
-
-		roles[r] = append(roles[r], username)
-	}
+	//for username, r := range rbac.users {
+	//	if _, ok := roles[r]; !ok {
+	//		roles[r] = make([]string, 0)
+	//	}
+	//
+	//	roles[r] = append(roles[r], username)
+	//}
 
 	return roles
 }
 
-func (rbac *RBAC) getModule(username string, module interface{}) (bool, string, string) {
-	var roleName string
+func (rbac *RBAC) getModule(username string, module interface{}) (bool, []string, string) {
+	var roles []string
 	var isFoundRole bool
 	var moduleName string
 
-	if isFoundRole, roleName = rbac.UserRole(username); !isFoundRole {
-		return false, "", ""
+	if isFoundRole, roles = rbac.UserRole(username); !isFoundRole {
+		return false, roles, ""
 	}
 
 	switch m := module.(type) {
@@ -153,30 +157,30 @@ func (rbac *RBAC) getModule(username string, module interface{}) (bool, string, 
 		panic(errors.New("module type error"))
 	}
 
-	return true, roleName, moduleName
+	return true, roles, moduleName
 }
 
 func (rbac *RBAC) Can(username string, module interface{}, controller string, action string) bool {
 	rbac.l.Lock()
 	defer rbac.l.Unlock()
 
-	var roleName string
+	var roles []string
 	var isFoundRole bool
 	var moduleName string
 
-	if isFoundRole, roleName, moduleName = rbac.getModule(username, module); !isFoundRole {
+	if isFoundRole, roles, moduleName = rbac.getModule(username, module); !isFoundRole {
 		return false
 	}
 
-	roleName = strcase.ToKebab(roleName)
+	for _, r := range roles {
+		var data = strings.Join([]string{strcase.ToKebab(r), moduleName, controller, action}, SPLIT)
 
-	var ruleCached = strings.Join([]string{roleName, moduleName, controller, action}, SPLIT)
+		data = strings.TrimRight(data, SPLIT)
 
-	ruleCached = strings.TrimRight(ruleCached, SPLIT)
-
-	for _, c := range rbac.ruleCached {
-		if strings.HasPrefix(c, ruleCached) {
-			return true
+		for _, c := range rbac.ruleCached {
+			if strings.HasPrefix(c, data) {
+				return true
+			}
 		}
 	}
 

@@ -9,7 +9,7 @@ import (
 func TestNew(t *testing.T) {
 	pg := New()
 
-	pg.Users("matt", "super administrator")
+	pg.Users("matt", "super administrator", "administrator")
 	pg.Users("tom", "administrator")
 
 	superAdministratorRole := NewRole("super administrator")
@@ -36,7 +36,7 @@ func TestNew(t *testing.T) {
 	println("----------")
 	spew.Dump(pg)
 	println("----------")
-	//spew.Dump(pg.UserRole("matt"))
+	spew.Dump(pg.UserRole("matt"))
 	spew.Dump(pg.RoleUsers())
 	spew.Dump(pg.Can("matt", "platform_system", "environment", "read"))
 	spew.Dump(pg.Can("matt", []string{"platform", "system"}, "environment", "read"))
