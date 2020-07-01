@@ -17,26 +17,39 @@ func GetModuleTrees(rules []IRule) []*Module {
 		}
 	}
 
-	// level 1
+	// 检测 module 的下级
 	for _, p := range parents {
+		var children int
+
 		for _, r := range rules {
-			if r.GetParentID() == p.GetID() /*&& r.GetLevel() == p.GetLevel() */{
+			if r.GetParentID() == p.GetID() && p.GetLevel() == r.GetLevel() {
 				modules = append(modules, &Module{
 					ID:    r.GetID(),
 					Level: r.GetLevel(),
 					Name:  []string{p.GetName(), r.GetName()},
 				})
+
+				children++
 			}
+		}
+
+		if children == 0 {
+			modules = append(modules, &Module{
+				ID:    p.GetID(),
+				Level: p.GetLevel(),
+				Name:  []string{p.GetName()},
+			})
 		}
 	}
 
+	// level 2
 	for _, m := range modules {
-		// level 2
 		for _, r := range rules {
-			if r.GetParentID() == m.ID /*&& r.GetLevel() == m.Level*/ {
+			if r.GetParentID() == m.ID {
 				var c = &Controller{
-					ID:   r.GetID(),
-					Name: r.GetName(),
+					ID:    r.GetID(),
+					Level: r.GetLevel(),
+					Name:  r.GetName(),
 				}
 
 				m.Controllers = append(m.Controllers, c)
@@ -48,9 +61,11 @@ func GetModuleTrees(rules []IRule) []*Module {
 		// level 3
 		for _, c := range m.Controllers {
 			for _, r := range rules {
-				if r.GetParentID() == c.ID /*&& r.GetLevel() == c.Level*/ {
+				if r.GetParentID() == c.ID /*&& r.GetLevel() == 3*/ {
 					c.Actions = append(c.Actions, &Action{
-						Name: r.GetName(),
+						ID:    r.GetID(),
+						Name:  r.GetName(),
+						Level: r.GetLevel(),
 					})
 				}
 			}
@@ -58,28 +73,4 @@ func GetModuleTrees(rules []IRule) []*Module {
 	}
 
 	return modules
-}
-
-type Tree struct {
-	Name     string
-	ID       uint
-	level    int
-	Children []*Tree
-}
-
-func GetRuleTrees(rules []IRule, parentID uint) []*Tree {
-	var t []*Tree
-
-	for _, r := range rules {
-		if r.GetParentID() == parentID {
-			t = append(t, &Tree{
-				Name:     r.GetName(),
-				ID:       r.GetID(),
-				Children: GetRuleTrees(rules, r.GetID()),
-				level:    r.GetLevel(),
-			})
-		}
-	}
-
-	return t
 }

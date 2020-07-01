@@ -68,14 +68,18 @@ func (r *Role) SetModules(m ...*Module) {
 	r.Modules = append(r.Modules, m...)
 }
 
-func NewModule(v ...string) *Module {
+func NewModule(ID uint, level int, v ...string) *Module {
 	return &Module{
-		Name: v,
+		ID:    ID,
+		Level: level,
+		Name:  v,
 	}
 }
 
-func NewController(v string, actions []*Action) *Controller {
+func NewController(ID uint, level int, v string, actions []*Action) *Controller {
 	return &Controller{
+		ID:      ID,
+		Level:   level,
 		Name:    v,
 		Actions: actions,
 	}
@@ -111,8 +115,8 @@ func (rbac *RBAC) Users(username string, roles ...string) {
 	rbac.l.Lock()
 	defer rbac.l.Unlock()
 
-	if _,ok := rbac.users[username] ;ok {
-		rbac.users[username] = append(rbac.users[username],roles...)
+	if _, ok := rbac.users[username]; ok {
+		rbac.users[username] = append(rbac.users[username], roles...)
 	} else {
 		rbac.users[username] = roles
 	}
@@ -133,7 +137,7 @@ func (rbac *RBAC) RoleUsers() map[string][]string {
 	var roles = make(map[string][]string)
 
 	for username, userRoles := range rbac.users {
-		for _,r := range userRoles {
+		for _, r := range userRoles {
 			if _, ok := roles[r]; !ok {
 				roles[r] = make([]string, 0)
 			}
