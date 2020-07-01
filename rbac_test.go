@@ -48,18 +48,24 @@ func TestError(t *testing.T) {
 	pg.Users("matt", "administrator")
 
 	role := NewRole("administrator")
-	m := NewModule("platform", "system")
+	system := NewModule("platform", "system")
+	member := NewModule("platform", "member")
 
-	c2 := NewController("member", []*Action{
+	c1 := NewController("environment", []*Action{
 		{Name: "index"},
 	})
 
-	m.SetControllers(c2)
-	role.SetModules(m)
+	c2 := NewController("role", []*Action{
+		{Name: "index"},
+	})
+
+	system.SetControllers(c1)
+	member.SetControllers(c2)
+	role.SetModules(system, member)
 	pg.SetRoles(role)
 
 	spew.Dump(pg)
-	spew.Dump(pg.Can("matt", []string{"platform", "system"}, "member", "index"))
+	spew.Dump(pg.Can("matt", []string{"platform", "system"}, "environment", "index"))
 	spew.Dump(pg.CanModule("matt", []string{"platform", "system"}))
-	spew.Dump(pg.CanController("matt", []string{"platform", "system"}, "member"))
+	spew.Dump(pg.Can("matt", []string{"platform", "member"}, "role", "index"))
 }

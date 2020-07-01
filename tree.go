@@ -9,10 +9,11 @@ type IRule interface {
 
 func GetModuleTrees(rules []IRule) []*Module {
 	var modules []*Module
+	var parents []*Module
 
 	for _, r := range rules {
 		if r.GetParentID() == 0 {
-			modules = append(modules, &Module{
+			parents = append(parents, &Module{
 				ID:    r.GetID(),
 				Level: r.GetLevel(),
 				Name:  []string{r.GetName()},
@@ -21,11 +22,16 @@ func GetModuleTrees(rules []IRule) []*Module {
 	}
 
 	// level 1
-	for _, m := range modules {
+	for _, p := range parents {
 		for _, r := range rules {
-			if r.GetParentID() == m.ID && m.Level == r.GetLevel() {
-				m.ID = r.GetID()
-				m.Name = append(m.Name, r.GetName())
+			if r.GetParentID() == p.ID && p.Level == r.GetLevel() {
+				//m.ID = r.GetID()
+				//m.Name = append(m.Name, r.GetName())
+				modules = append(modules, &Module{
+					ID:    r.GetID(),
+					Level: r.GetLevel(),
+					Name:  []string{p.Name[0], r.GetName()},
+				})
 			}
 		}
 	}
