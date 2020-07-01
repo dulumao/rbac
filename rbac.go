@@ -111,7 +111,11 @@ func (rbac *RBAC) Users(username string, roles ...string) {
 	rbac.l.Lock()
 	defer rbac.l.Unlock()
 
-	rbac.users[username] = roles
+	if _,ok := rbac.users[username] ;ok {
+		rbac.users[username] = append(rbac.users[username],roles...)
+	} else {
+		rbac.users[username] = roles
+	}
 }
 
 func (rbac *RBAC) UserRole(username string) (bool, []string) {
@@ -128,13 +132,15 @@ func (rbac *RBAC) UserRole(username string) (bool, []string) {
 func (rbac *RBAC) RoleUsers() map[string][]string {
 	var roles = make(map[string][]string)
 
-	//for username, r := range rbac.users {
-	//	if _, ok := roles[r]; !ok {
-	//		roles[r] = make([]string, 0)
-	//	}
-	//
-	//	roles[r] = append(roles[r], username)
-	//}
+	for username, userRoles := range rbac.users {
+		for _,r := range userRoles {
+			if _, ok := roles[r]; !ok {
+				roles[r] = make([]string, 0)
+			}
+
+			roles[r] = append(roles[r], username)
+		}
+	}
 
 	return roles
 }
