@@ -110,16 +110,13 @@ func (rbac *RBAC) Users(username string, groupName string) {
 	rbac.users[username] = groupName
 }
 
-func (rbac *RBAC) Can(username string, module interface{}, controller string, action string) bool {
-	rbac.l.Lock()
-	defer rbac.l.Unlock()
-
-	var groupName string
-	var isFoundGroup bool
+func (rbac *RBAC) getRoleModule(username string, module interface{}) (bool, string, string) {
+	var roleName string
+	var isFoundRole bool
 	var moduleName string
 
-	if groupName, isFoundGroup = rbac.users[username]; !isFoundGroup {
-		return false
+	if roleName, isFoundRole = rbac.users[username]; !isFoundRole {
+		return false, "", ""
 	}
 
 	switch m := module.(type) {
@@ -131,10 +128,47 @@ func (rbac *RBAC) Can(username string, module interface{}, controller string, ac
 		panic(errors.New("module type error"))
 	}
 
-	var ruleCached = strings.Join([]string{groupName, moduleName, controller, action}, SPLIT)
+	return true, roleName, moduleName
+}
+
+func (rbac *RBAC) Can(username string, module interface{}, controller string, action string) bool {
+	rbac.l.Lock()
+	defer rbac.l.Unlock()
+
+	var roleName string
+	var isFoundRole bool
+	var moduleName string
+
+	if isFoundRole, roleName, moduleName = rbac.getRoleModule(username, module); !isFoundRole {
+		return false
+	}
+
+	var ruleCached = strings.Join([]string{roleName, moduleName, controller, action}, SPLIT)
 
 	for _, c := range rbac.ruleCached {
 		if c == ruleCached {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (rbac *RBAC) CanController(username string, module interface{}, controller string) bool {
+	rbac.l.Lock()
+	defer rbac.l.Unlock()
+	var roleName string
+	var isFoundRole bool
+	var moduleName string
+
+	if isFoundRole, roleName, moduleName = rbac.getRoleModule(username, module); !isFoundRole {
+		return false
+	}
+
+	var ruleCached = strings.Join([]string{roleName, moduleName, controller}, SPLIT)
+
+	for _, c := range rbac.ruleCached {
+		if strings.HasPrefix(c, ruleCached) {
 			return true
 		}
 	}

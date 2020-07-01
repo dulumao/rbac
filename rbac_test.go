@@ -7,8 +7,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	//SetSPLIT(".")
-	//SetSUB(".")
+	SetSPLIT(".")
+	SetSUB(".")
 
 	pg := New()
 
@@ -36,4 +36,24 @@ func TestNew(t *testing.T) {
 	spew.Dump(pg)
 	spew.Dump(pg.Can("matt", "platform_system", "environment", "read"))
 	spew.Dump(pg.Can("matt", []string{"platform", "system"}, "environment", "read"))
+}
+
+func TestError(t *testing.T) {
+	pg := New()
+
+	pg.Users("matt", "administrator")
+
+	role := NewRole("administrator")
+	m := NewModule("platform", "system")
+
+	c2 := NewController("member", []*Action{
+	})
+
+	m.SetControllers(c2)
+	role.SetModules(m)
+	pg.SetRoles(role)
+
+	spew.Dump(pg)
+	spew.Dump(pg.Can("matt", []string{"platform", "system"}, "member", "index"))
+	spew.Dump(pg.CanController("matt", []string{"platform", "system"}, "member"))
 }
