@@ -7,16 +7,13 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	SetSPLIT(".")
-	SetSUB(".")
-
 	pg := New()
 
 	pg.Users("matt", "super administrator")
-	pg.Users("matt", "administrator")
+	pg.Users("tom", "administrator")
 
-	role := NewRole("super administrator")
-	m := NewModule("platform", "system")
+	superAdministratorRole := NewRole("super administrator")
+	administratorRole := NewRole("administrator")
 
 	c1 := NewController("environment", []*Action{
 		{Name: "index"},
@@ -29,11 +26,18 @@ func TestNew(t *testing.T) {
 		{Name: "index"},
 	})
 
+	m := NewModule("platform", "system")
 	m.SetControllers(c1, c2)
-	role.SetModules(m)
-	pg.SetRoles(role)
 
+	superAdministratorRole.SetModules(m)
+
+	pg.SetRoles(superAdministratorRole, administratorRole)
+
+	println("----------")
 	spew.Dump(pg)
+	println("----------")
+	//spew.Dump(pg.UserRole("matt"))
+	spew.Dump(pg.RoleUsers())
 	spew.Dump(pg.Can("matt", "platform_system", "environment", "read"))
 	spew.Dump(pg.Can("matt", []string{"platform", "system"}, "environment", "read"))
 }
@@ -56,5 +60,6 @@ func TestError(t *testing.T) {
 
 	spew.Dump(pg)
 	spew.Dump(pg.Can("matt", []string{"platform", "system"}, "member", "index"))
+	spew.Dump(pg.CanModule("matt", []string{"platform", "system"}))
 	spew.Dump(pg.CanController("matt", []string{"platform", "system"}, "member"))
 }
