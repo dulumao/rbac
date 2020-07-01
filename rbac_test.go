@@ -47,6 +47,7 @@ func TestError(t *testing.T) {
 	m := NewModule("platform", "system")
 
 	c2 := NewController("member", []*Action{
+		{Name: "index"},
 	})
 
 	m.SetControllers(c2)
