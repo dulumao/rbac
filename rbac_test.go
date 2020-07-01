@@ -48,8 +48,14 @@ func TestError(t *testing.T) {
 	pg.Users("matt", "administrator")
 
 	role := NewRole("administrator")
+
+	dashboard := NewModule("dashboard")
 	system := NewModule("platform", "system")
 	member := NewModule("platform", "member")
+
+	c0 := NewController("dashboard", []*Action{
+		{Name: "index"},
+	})
 
 	c1 := NewController("environment", []*Action{
 		{Name: "index"},
@@ -59,9 +65,10 @@ func TestError(t *testing.T) {
 		{Name: "index"},
 	})
 
+	dashboard.SetControllers(c0)
 	system.SetControllers(c1)
 	member.SetControllers(c2)
-	role.SetModules(system, member)
+	role.SetModules(dashboard, system, member)
 	pg.SetRoles(role)
 
 	spew.Dump(pg)
