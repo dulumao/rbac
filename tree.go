@@ -20,7 +20,7 @@ func GetModuleTrees(rules []IRule) []*Module {
 	// level 1
 	for _, p := range parents {
 		for _, r := range rules {
-			if r.GetParentID() == p.GetID() && r.GetLevel() == 1 {
+			if r.GetParentID() == p.GetID() && r.GetLevel() == p.GetLevel() {
 				modules = append(modules, &Module{
 					ID:    r.GetID(),
 					Level: r.GetLevel(),
@@ -33,7 +33,7 @@ func GetModuleTrees(rules []IRule) []*Module {
 	for _, m := range modules {
 		// level 2
 		for _, r := range rules {
-			if r.GetParentID() == m.ID && r.GetLevel() == 2 {
+			if r.GetParentID() == m.ID && r.GetLevel() == m.Level {
 				var c = &Controller{
 					ID:   r.GetID(),
 					Name: r.GetName(),
@@ -48,7 +48,7 @@ func GetModuleTrees(rules []IRule) []*Module {
 		// level 3
 		for _, c := range m.Controllers {
 			for _, r := range rules {
-				if r.GetParentID() == c.ID && r.GetLevel() == 3 {
+				if r.GetParentID() == c.ID && r.GetLevel() == c.Level {
 					c.Actions = append(c.Actions, &Action{
 						Name: r.GetName(),
 					})
