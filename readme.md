@@ -10,7 +10,7 @@ CREATE TABLE `dtb_permission_rule` (
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `dtb_permission_group` (
+CREATE TABLE `dtb_permission_role` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `title` longtext COMMENT '名称',
   `memo` longtext COMMENT '组描述',
@@ -20,10 +20,10 @@ CREATE TABLE `dtb_permission_group` (
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `dtb_member_group` (
+CREATE TABLE `dtb_member_role` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(11) DEFAULT NULL,
-  `permission_group_id` int(11) DEFAULT NULL,
+  `permission_role_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;

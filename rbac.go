@@ -68,18 +68,14 @@ func (r *Role) SetModules(m ...*Module) {
 	r.Modules = append(r.Modules, m...)
 }
 
-func NewModule(ID uint, level int, v ...string) *Module {
+func NewModule(v ...string) *Module {
 	return &Module{
-		ID:    ID,
-		Level: level,
 		Name:  v,
 	}
 }
 
-func NewController(ID uint, level int, v string, actions []*Action) *Controller {
+func NewController(v string, actions []*Action) *Controller {
 	return &Controller{
-		ID:      ID,
-		Level:   level,
 		Name:    v,
 		Actions: actions,
 	}

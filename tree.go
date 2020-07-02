@@ -5,6 +5,7 @@ type IRule interface {
 	GetID() uint
 	GetLevel() int
 	GetName() string
+	GetTitle() string
 }
 
 func GetModuleTrees(rules []IRule) []*Module {
@@ -73,4 +74,30 @@ func GetModuleTrees(rules []IRule) []*Module {
 	}
 
 	return modules
+}
+
+type Tree struct {
+	Title    string
+	Name     string
+	ID       uint
+	level    int
+	Children []*Tree
+}
+
+func GetRuleTrees(rules []IRule, parentID uint) []*Tree {
+	var t []*Tree
+
+	for _, r := range rules {
+		if r.GetParentID() == parentID {
+			t = append(t, &Tree{
+				Title:    r.GetTitle(),
+				Name:     r.GetName(),
+				ID:       r.GetID(),
+				Children: GetRuleTrees(rules, r.GetID()),
+				level:    r.GetLevel(),
+			})
+		}
+	}
+
+	return t
 }
