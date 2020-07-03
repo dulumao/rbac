@@ -80,12 +80,12 @@ type Tree struct {
 	Title    string
 	Name     string
 	ID       uint
-	level    int
+	Level    int
 	Children []*Tree
 }
 
 func GetRuleTrees(rules []IRule, parentID uint) []*Tree {
-	var t []*Tree
+	var t = make([]*Tree, 0)
 
 	for _, r := range rules {
 		if r.GetParentID() == parentID {
@@ -94,7 +94,7 @@ func GetRuleTrees(rules []IRule, parentID uint) []*Tree {
 				Name:     r.GetName(),
 				ID:       r.GetID(),
 				Children: GetRuleTrees(rules, r.GetID()),
-				level:    r.GetLevel(),
+				Level:    r.GetLevel(),
 			})
 		}
 	}

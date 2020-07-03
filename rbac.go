@@ -10,6 +10,7 @@ import (
 
 var SPLIT = "_"
 var SUB = "_"
+var GOD = "__$$GOD$$__"
 
 func SetSPLIT(v string) {
 	SPLIT = v
@@ -24,6 +25,8 @@ type RBAC struct {
 	users      map[string][]string
 	ruleCached []string
 	l          sync.Mutex
+	// 上帝用户
+	god string
 }
 
 type Role struct {
@@ -70,7 +73,7 @@ func (r *Role) SetModules(m ...*Module) {
 
 func NewModule(v ...string) *Module {
 	return &Module{
-		Name:  v,
+		Name: v,
 	}
 }
 
@@ -103,8 +106,16 @@ func (rbac *RBAC) SetRoles(g ...*Role) {
 	}
 }
 
-func (rbac *RBAC) God(username string) {
+func (rbac *RBAC) SetGod(username string) {
+	rbac.god = username
+}
 
+func (rbac *RBAC) IsGod(username string) bool {
+	if rbac.god == username {
+		return true
+	}
+
+	return false
 }
 
 func (rbac *RBAC) Users(username string, roles ...string) {
@@ -121,6 +132,10 @@ func (rbac *RBAC) Users(username string, roles ...string) {
 func (rbac *RBAC) UserRole(username string) (bool, []string) {
 	var roles []string
 	var isFoundRole bool
+
+	if rbac.IsGod(username) {
+		return true, []string{GOD}
+	}
 
 	if roles, isFoundRole = rbac.users[username]; !isFoundRole {
 		return false, roles
@@ -176,6 +191,10 @@ func (rbac *RBAC) Can(username string, module interface{}, controller string, ac
 
 	if isFoundRole, roles, moduleName = rbac.getModule(username, module); !isFoundRole {
 		return false
+	}
+
+	if roles[0] == GOD {
+		return true
 	}
 
 	for _, r := range roles {
