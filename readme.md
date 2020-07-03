@@ -49,3 +49,19 @@ INSERT INTO `dtb_permission_rule` (`id`, `title`, `name`, `parent_id`, `status`,
 ('16', '列表', 'index', '15', '1', '3'),
 ('17', '重启', 'restart', '15', '1', '3');
 ```
+
+level 1 = modules
+level 2 = controller
+level 3 = actions
+
+module > (module + module + module ...) > single controller > (action + action +action ...)
+
+demo 1:
+platform > system > environment > (index, read, delete)
+platform > system > server > (index, read, delete)
+platform > member > admins > (index, read, delete)
+platform > member > roles > (index, read, delete)
+
+demo 2:
+platform > environment > (index, read, delete)
+platform > member > (index, read, delete)
